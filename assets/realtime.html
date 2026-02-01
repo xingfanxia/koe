@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Koe 声</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#FAF8F5" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Source+Sans+3:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="static/style.css?v=20260117">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav-bar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                    </svg>
+                </div>
+                <span class="brand-name font-display">Koe</span>
+                <span class="brand-kanji">声</span>
+            </div>
+
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-view="home">home</button>
+                <button class="nav-tab" data-view="library">library</button>
+                <button class="nav-tab" data-view="jobs">jobs</button>
+                <button class="nav-tab" data-view="settings">settings</button>
+            </div>
+
+            <button class="assistant-btn" id="assistantToggle">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z"></path>
+                </svg>
+                <span>Assistant</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-container">
+
+            <!-- Home View -->
+            <div id="homeView" class="view animate-float-up">
+                <!-- Hero Recording Section -->
+                <div class="recording-hero">
+                    <div class="record-btn-wrapper">
+                        <!-- Pulse rings (shown when recording) -->
+                        <div class="pulse-ring pulse-ring-1" id="pulseRing1"></div>
+                        <div class="pulse-ring pulse-ring-2" id="pulseRing2"></div>
+
+                        <!-- Stone Wave (circular around button during processing) -->
+                        <div class="stone-wave-container" id="stoneWaveContainer" style="display: none;">
+                            <div class="stone-wave" id="stoneWave"></div>
+                        </div>
+
+                        <!-- Main Record Button -->
+                        <button id="recordButton" class="record-btn" aria-live="polite" aria-pressed="false">
+                            <svg class="mic-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                <line x1="12" x2="12" y1="19" y2="22"></line>
+                            </svg>
+                            <div class="stop-icon"></div>
+                        </button>
+                    </div>
+
+                    <!-- Recording Time / Status -->
+                    <div class="recording-status">
+                        <p class="recording-time font-display" id="timer">00:00</p>
+                        <p class="recording-label" id="recordingLabel">Begin Recording</p>
+                        <p class="recording-hint" id="recordingHint">Tap to capture and transcribe</p>
+                    </div>
+
+                    <!-- Mode Selector -->
+                    <div class="mode-selector">
+                        <button class="mode-option" data-mode="gemini" title="Batch processing, more accurate">
+                            <span class="mode-label">Accuracy</span>
+                        </button>
+                        <button class="mode-option active" data-mode="openai" title="Real-time streaming, faster">
+                            <span class="mode-label">Live</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Featured Transcription with Polish Indicator (full-width) -->
+                <div class="featured-transcription-wrapper">
+                    <div class="featured-transcription polish-disabled" id="featuredTranscription" style="display: none;">
+                        <div class="polish-indicator" id="polishIndicator">
+                            <span class="polish-dot">◇</span>
+                            <span class="polish-text">Raw transcript</span>
+                        </div>
+                        <div class="featured-header">
+                            <div class="featured-info">
+                                <h2 class="featured-title font-display" id="featuredTitle">Latest Transcription</h2>
+                                <span class="featured-date" id="featuredDate"></span>
+                            </div>
+                            <button class="featured-copy-btn" id="featuredCopyBtn" title="Copy to clipboard">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+                                    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="featured-content" id="featuredContent">
+                            <!-- Polished transcript text will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Transcriptions -->
+                <div class="recent-section">
+                    <div class="section-header">
+                        <h2 class="section-title">RECENT TRANSCRIPTIONS</h2>
+                        <button class="view-all-btn" id="viewAllBtn">
+                            View all
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="transcriptions-grid" id="recentTranscriptions">
+                        <!-- Transcription cards will be populated here -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Transcription Detail View -->
+            <div id="detailView" class="view" style="display: none;">
+                <!-- Populated dynamically -->
+            </div>
+
+            <!-- Library View -->
+            <div id="libraryView" class="view" style="display: none;">
+                <h1 class="view-title font-display">Library</h1>
+                <p class="view-subtitle">All your transcriptions, preserved</p>
+
+                <!-- Upload Zone -->
+                <div class="upload-zone" id="libraryDropzone">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" x2="12" y1="3" y2="15"></line>
+                    </svg>
+                    <p class="upload-zone-text">Drop files here or click to upload</p>
+                    <p class="upload-zone-hint">MP3, WAV, M4A, FLAC up to 500MB</p>
+                    <input type="file" id="libraryDropzoneFile" accept="audio/wav,audio/wave,audio/x-wav,audio/mpeg,audio/mp3,audio/ogg,audio/flac,audio/mp4,audio/x-m4a,.m4a" hidden>
+                </div>
+
+                <div class="library-list" id="libraryList">
+                    <!-- Transcription items will be populated here -->
+                </div>
+            </div>
+
+            <!-- Jobs View -->
+            <div id="jobsView" class="view" style="display: none;">
+                <h1 class="view-title font-display">Transcription Jobs</h1>
+                <p class="view-subtitle">Monitor ongoing and completed processes</p>
+
+                <div class="jobs-list" id="jobsList">
+                    <!-- Job items will be populated here -->
+                </div>
+            </div>
+
+            <!-- Settings View -->
+            <div id="settingsView" class="view" style="display: none;">
+                <h1 class="view-title font-display">Settings</h1>
+                <p class="view-subtitle">Configure transcription preferences</p>
+
+                <div class="settings-container">
+                    <!-- Fn Key Tip -->
+                    <div id="fnKeyTip" class="settings-tip-card">
+                        <div class="tip-content">
+                            <p class="tip-title">Fn Key Setup</p>
+                            <p class="tip-text">If you use the Fn/Globe key as your hotkey, go to <strong>System Settings → Keyboard</strong> and set <strong>"Press 🌐 key to"</strong> → <strong>"Do Nothing"</strong> to prevent input source switching.</p>
+                        </div>
+                        <button id="fnKeyTipDismiss" class="tip-dismiss" aria-label="Dismiss tip">&times;</button>
+                    </div>
+
+                    <!-- Transcription Settings -->
+                    <section class="settings-section">
+                        <h2 class="section-title">TRANSCRIPTION</h2>
+
+                        <div class="settings-list">
+                            <div class="setting-toggle" data-setting="autoDetectSpeakers">
+                                <div class="setting-info">
+                                    <p class="setting-label">Auto-detect speakers</p>
+                                    <p class="setting-desc">Automatically identify and label different speakers</p>
+                                </div>
+                                <div class="toggle-switch">
+                                    <div class="toggle-knob"></div>
+                                </div>
+                            </div>
+
+                            <div class="setting-toggle" data-setting="punctuation">
+                                <div class="setting-info">
+                                    <p class="setting-label">Smart punctuation</p>
+                                    <p class="setting-desc">Add punctuation and formatting automatically</p>
+                                </div>
+                                <div class="toggle-switch">
+                                    <div class="toggle-knob"></div>
+                                </div>
+                            </div>
+
+                            <div class="setting-toggle" data-setting="timestamps">
+                                <div class="setting-info">
+                                    <p class="setting-label">Include timestamps</p>
+                                    <p class="setting-desc">Add time markers to transcript segments</p>
+                                </div>
+                                <div class="toggle-switch">
+                                    <div class="toggle-knob"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Language Settings -->
+                    <section class="settings-section">
+                        <h2 class="section-title">LANGUAGE</h2>
+
+                        <div class="setting-card">
+                            <label class="setting-select-label">Primary language</label>
+                            <select id="languageSelect" class="setting-select">
+                                <option value="auto">Auto-detect</option>
+                                <option value="en">English</option>
+                                <option value="ja">Japanese</option>
+                                <option value="es">Spanish</option>
+                                <option value="fr">French</option>
+                                <option value="de">German</option>
+                                <option value="zh">Chinese</option>
+                            </select>
+                        </div>
+                    </section>
+
+                    <!-- Briefings Settings -->
+                    <section class="settings-section">
+                        <h2 class="section-title">BRIEFINGS</h2>
+
+                        <div class="setting-card">
+                            <label class="setting-select-label">Summary length</label>
+                            <div class="summary-options">
+                                <button class="summary-option" data-length="brief">brief</button>
+                                <button class="summary-option active" data-length="medium">medium</button>
+                                <button class="summary-option" data-length="detailed">detailed</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Consensus Mode Settings -->
+                    <section class="settings-section">
+                        <h2 class="section-title">CONSENSUS MODE</h2>
+                        <p class="setting-desc" style="margin-bottom: 12px;">3x parallel transcriptions + synthesis. ~3x API cost.</p>
+
+                        <div class="settings-list">
+                            <div class="setting-toggle" data-setting="consensusEnabled">
+                                <div class="setting-info">
+                                    <p class="setting-label">Enable consensus transcription</p>
+                                    <p class="setting-desc">Run 3 parallel GPT-4o transcriptions for higher accuracy</p>
+                                </div>
+                                <div class="toggle-switch">
+                                    <div class="toggle-knob"></div>
+                                </div>
+                            </div>
+
+                            <div class="setting-toggle" data-setting="consensusMemoryEnabled">
+                                <div class="setting-info">
+                                    <p class="setting-label">Vocabulary learning</p>
+                                    <p class="setting-desc">Auto-learn terms from transcriptions to improve future accuracy</p>
+                                </div>
+                                <div class="toggle-switch">
+                                    <div class="toggle-knob"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Polish Settings -->
+                    <section class="settings-section">
+                        <h2 class="section-title">POLISH</h2>
+
+                        <div class="settings-list">
+                            <div class="setting-toggle" data-setting="autoPolish" id="autoPolishToggle">
+                                <div class="setting-info">
+                                    <p class="setting-label">Auto-polish transcripts</p>
+                                    <p class="setting-desc">Automatically enhance readability after transcription</p>
+                                </div>
+                                <div class="toggle-switch">
+                                    <div class="toggle-knob"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-card">
+                            <label class="setting-select-label">Writing style</label>
+                            <select id="polishStyleSelect" class="setting-select">
+                                <option value="natural">Natural - Clean, readable flow</option>
+                                <option value="formal">Formal - Professional, structured</option>
+                                <option value="concise">Concise - Shortened, key points</option>
+                                <option value="technical">Technical - Precise terminology</option>
+                                <option value="conversational">Conversational - Casual, friendly</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-card">
+                            <label class="setting-select-label">Custom instructions (optional)</label>
+                            <textarea id="customPolishPrompt" class="setting-textarea" rows="3" placeholder="Add any specific instructions for polishing..."></textarea>
+                        </div>
+                    </section>
+
+                    <!-- Model Settings -->
+                    <section class="settings-section">
+                        <h2 class="section-title">MODEL</h2>
+
+                        <div class="setting-card">
+                            <label class="setting-select-label">Gemini model</label>
+                            <select id="geminiModelSelect" class="setting-select">
+                                <option value="gemini-3-flash-preview">Gemini 3 Flash (faster)</option>
+                                <option value="gemini-3-pro-preview">Gemini 3 Pro (more accurate)</option>
+                            </select>
+                        </div>
+                    </section>
+
+                    <!-- Custom Prompt Settings -->
+                    <section class="settings-section">
+                        <h2 class="section-title">CUSTOM PROMPT</h2>
+
+                        <div class="setting-card">
+                            <label class="setting-select-label">Custom transcription prompt (optional)</label>
+                            <textarea id="customTranscriptionPrompt" class="setting-textarea" rows="5" placeholder="Override the default transcription prompt. Leave empty to use the built-in prompt with your settings above."></textarea>
+                            <p class="setting-hint">When set, this replaces the default prompt. Use for specialized transcription needs.</p>
+                        </div>
+                    </section>
+
+                    <!-- Hotkey Settings -->
+                    <section class="settings-section">
+                        <h2 class="section-title">HOTKEY</h2>
+
+                        <div class="setting-card">
+                            <label class="setting-select-label">Recording hotkey</label>
+                            <div class="hotkey-input-wrapper">
+                                <input type="text" id="hotkeyInput" class="setting-input hotkey-input" placeholder="Click to set hotkey..." readonly>
+                                <button id="hotkeyRecordBtn" class="hotkey-record-btn" title="Record new hotkey">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <circle cx="12" cy="12" r="3" fill="currentColor"></circle>
+                                    </svg>
+                                </button>
+                                <button id="hotkeyResetBtn" class="hotkey-reset-btn" title="Reset to Fn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 12a9 9 0 1 1 3 6.7"></path>
+                                        <polyline points="3 17 3 12 8 12"></polyline>
+                                    </svg>
+                                </button>
+                            </div>
+                            <p class="setting-hint">Press the record button then press your desired key combination. Reset restores Fn.</p>
+                        </div>
+                    </section>
+
+                    <!-- API Keys Settings -->
+                    <section class="settings-section">
+                        <h2 class="section-title">API KEYS</h2>
+
+                        <div class="setting-card">
+                            <label class="setting-select-label">OpenAI API Key</label>
+                            <input type="password" id="openaiKey" class="setting-input" placeholder="sk-...">
+                        </div>
+
+                        <div class="setting-card">
+                            <label class="setting-select-label">Google API Key</label>
+                            <input type="password" id="geminiKey" class="setting-input" placeholder="AIza...">
+                        </div>
+
+                        <button id="saveSettings" class="save-settings-btn">Save Settings</button>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Assistant Panel -->
+    <div class="assistant-overlay" id="assistantOverlay">
+        <div class="assistant-panel" id="assistantPanel">
+            <!-- Header -->
+            <div class="assistant-header">
+                <div class="assistant-info">
+                    <div class="assistant-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="assistant-title font-display">Assistant</p>
+                        <p class="assistant-subtitle">Ask about your transcriptions</p>
+                    </div>
+                </div>
+
+                <button class="assistant-close" id="assistantClose">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" x2="6" y1="6" y2="18"></line>
+                        <line x1="6" x2="18" y1="6" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Messages -->
+            <div class="assistant-messages" id="assistantMessages">
+                <div class="chat-message assistant">
+                    <div class="message-bubble">
+                        <p>The AI assistant feature is coming soon. You'll be able to ask questions about your transcriptions, find specific moments, and get summaries of your recordings.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input -->
+            <div class="assistant-input-area">
+                <div class="assistant-input-wrapper">
+                    <input type="text" id="assistantInput" class="assistant-input" placeholder="Ask about your transcriptions...">
+                    <button class="assistant-send" id="assistantSend">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" x2="11" y1="2" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <button class="quick-action">Summarize recent meeting</button>
+                    <button class="quick-action">Find action items</button>
+                    <button class="quick-action">Who said what about...</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="completion-toast" id="toast"></div>
+
+    <script src="static/main.js?v=20260122b" defer></script>
+
+</body>
+</html>
