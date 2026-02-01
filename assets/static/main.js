@@ -1058,6 +1058,33 @@ async function stopRecording() {
         // Capture end timestamp now, before any async processing delay
         liveRecordingEndTime = Date.now();
 
+        // Flush residual audio from the worklet buffer before committing
+        if (liveAudioWorklet) {
+            const originalHandler = liveAudioWorklet.port.onmessage;
+            await new Promise((resolve) => {
+                const timeout = setTimeout(() => {
+                    console.warn('AudioWorklet flush timed out after 500ms');
+                    liveAudioWorklet.port.onmessage = originalHandler;
+                    resolve();
+                }, 500);
+                liveAudioWorklet.port.onmessage = (event) => {
+                    if (event.data && event.data.flushed) {
+                        clearTimeout(timeout);
+                        liveAudioWorklet.port.onmessage = originalHandler;
+                        resolve();
+                    } else {
+                        // Forward PCM audio chunks normally
+                        if (originalHandler) originalHandler(event);
+                    }
+                };
+                liveAudioWorklet.port.postMessage({ command: 'flush' });
+            });
+            console.log('AudioWorklet buffer flushed');
+        }
+
+        // Brief pause to let in-flight IPC audio chunks arrive at the backend
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
         if (window.electronAPI && window.electronAPI.openAIRealtimeStop) {
             await window.electronAPI.openAIRealtimeStop();
         }

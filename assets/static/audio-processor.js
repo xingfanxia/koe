@@ -6,6 +6,22 @@ class AudioProcessor extends AudioWorkletProcessor {
         super();
         this.bufferSize = 4096; // Buffer size for sending chunks
         this.buffer = new Float32Array(0);
+
+        // Listen for flush command to send remaining buffer on stop
+        this.port.onmessage = (event) => {
+            if (event.data && event.data.command === 'flush') {
+                if (this.buffer.length > 0) {
+                    const pcm = new Int16Array(this.buffer.length);
+                    for (let i = 0; i < this.buffer.length; i++) {
+                        const s = Math.max(-1, Math.min(1, this.buffer[i]));
+                        pcm[i] = s < 0 ? s * 32768 : s * 32767;
+                    }
+                    this.port.postMessage(pcm.buffer, [pcm.buffer]);
+                    this.buffer = new Float32Array(0);
+                }
+                this.port.postMessage({ flushed: true });
+            }
+        };
     }
 
     process(inputs, outputs, parameters) {

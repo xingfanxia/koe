@@ -1,6 +1,6 @@
 {
   "name": "koe",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Voice transcription with global hotkey support",
   "main": "dist/main.js",
   "scripts": {
@@ -13,7 +13,7 @@
     "release": "./scripts/release.sh"
   },
   "author": "",
-  "license": "PolyForm-Noncommercial-1.0.0",
+  "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.10.0",
     "@types/ws": "^8.5.10",
