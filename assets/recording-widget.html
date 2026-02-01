@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+  <style>
+    :root {
+      --sumi-black: #1C1C1C;
+      --washi-white: #FAF8F5;
+      --vermillion: #C23B22;
+      --moss-stone: #6B7B5E;
+      --diluted-ink: #8B8B8B;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: transparent;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+    }
+
+    .widget-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin: 2px;
+      transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1),
+                  background 0.3s ease;
+      background: var(--washi-white);
+      box-shadow: 0 4px 16px rgba(28, 28, 28, 0.15), 0 2px 4px rgba(28, 28, 28, 0.08);
+    }
+
+    .widget-btn:hover {
+      transform: scale(1.08);
+    }
+
+    .widget-btn:active {
+      transform: scale(0.95);
+    }
+
+    .widget-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--sumi-black);
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: stroke 0.3s ease;
+    }
+
+    /* States */
+    .widget-btn.recording {
+      background: var(--vermillion);
+    }
+    .widget-btn.recording svg {
+      stroke: var(--washi-white);
+    }
+
+    .widget-btn.processing {
+      background: var(--sumi-black);
+    }
+    .widget-btn.processing svg {
+      stroke: var(--washi-white);
+    }
+
+    .widget-btn.success {
+      background: var(--moss-stone);
+    }
+    .widget-btn.success svg {
+      stroke: var(--washi-white);
+    }
+
+    .widget-btn.error {
+      background: var(--vermillion);
+    }
+    .widget-btn.error svg {
+      stroke: var(--washi-white);
+    }
+
+    /* Pulse ring for recording */
+    .pulse-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid var(--vermillion);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .recording .pulse-ring {
+      animation: pulse 2s ease-out infinite;
+    }
+
+    .recording .pulse-ring.delay {
+      animation-delay: 0.6s;
+    }
+
+    /* Spinner for processing */
+    .widget-btn.processing svg.icon-processing {
+      animation: spin 1.2s linear infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.6; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <button class="widget-btn" id="btn" onclick="window.widgetAPI && window.widgetAPI.toggleRecording()">
+    <div class="pulse-ring"></div>
+    <div class="pulse-ring delay"></div>
+    <svg id="icon" viewBox="0 0 24 24">
+      <!-- Mic icon (idle) -->
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" fill="none"></path>
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+      <line x1="12" y1="19" x2="12" y2="23"></line>
+      <line x1="8" y1="23" x2="16" y2="23"></line>
+    </svg>
+  </button>
+  <script>
+    var icons = {
+      idle: '<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" fill="none"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line>',
+      recording: '<circle cx="12" cy="12" r="6" fill="currentColor" stroke="none"></circle>',
+      processing: '<path d="M21 12a9 9 0 1 1-6.219-8.56"></path>',
+      success: '<polyline points="20 6 9 17 4 12"></polyline>',
+      error: '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>',
+    };
+
+    function updateWidget(state) {
+      var btn = document.getElementById('btn');
+      var icon = document.getElementById('icon');
+      btn.className = 'widget-btn ' + state.status;
+      icon.innerHTML = icons[state.status] || icons.idle;
+      if (state.status === 'processing') {
+        icon.classList.add('icon-processing');
+      } else {
+        icon.classList.remove('icon-processing');
+      }
+    }
+
+    if (window.widgetAPI) {
+      window.widgetAPI.onStateUpdate(updateWidget);
+    }
+  </script>
+</body>
+</html>
