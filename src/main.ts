@@ -497,7 +497,7 @@ app.on('before-quit', () => {
   isAppQuitting = true;
 });
 
-app.on('will-quit', () => {
+app.on('will-quit', (event) => {
   const orchestrator = getOrchestrator();
   orchestrator.stop();
 
@@ -516,4 +516,9 @@ app.on('will-quit', () => {
     void openAIClient.disconnect();
     openAIClient = null;
   }
+
+  // Force exit after cleanup — keyspy child process can keep the app alive
+  // if SIGTERM doesn't kill the native binary fast enough.
+  event.preventDefault();
+  setTimeout(() => process.exit(0), 200);
 });
