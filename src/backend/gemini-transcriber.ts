@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { spawn } from 'child_process';
 import { ConfigManager } from './config-manager';
+import { getFfmpegPath } from './ffmpeg-paths';
 import { buildTranscriptionPrompt, buildChunkTranscriptionPrompt, buildPolishPrompt } from './prompts';
 import { splitAudio, cleanupChunks, AudioChunk } from './audio-chunker';
 
@@ -59,7 +60,7 @@ export class GeminiTranscriber {
     const convertedPath = audioPath.replace(/\.webm$/i, '_converted.wav');
 
     const conversionOk = await new Promise<boolean>((resolve) => {
-      const child = spawn('ffmpeg', ['-y', '-i', audioPath, '-ar', '16000', '-ac', '1', convertedPath], {
+      const child = spawn(getFfmpegPath(), ['-y', '-i', audioPath, '-ar', '16000', '-ac', '1', convertedPath], {
         stdio: 'ignore',
       });
 

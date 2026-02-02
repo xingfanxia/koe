@@ -1,6 +1,6 @@
 {
   "name": "koe",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Voice transcription with global hotkey support",
   "main": "dist/main.js",
   "scripts": {
@@ -34,7 +34,7 @@
     "productName": "Koe",
     "icon": "assets/icon.icns",
     "files": [
-      "dist/**/*.js",
+      "dist/**/*",
       "assets/**/*"
     ],
     "mac": {
@@ -53,6 +53,15 @@
         "NSAccessibilityUsageDescription": "Koe needs accessibility access to insert transcribed text at your cursor."
       }
     },
-    "extraResources": []
+    "extraResources": [
+      {
+        "from": "bin/",
+        "to": "bin/",
+        "filter": [
+          "ffmpeg",
+          "ffprobe"
+        ]
+      }
+    ]
   }
 }

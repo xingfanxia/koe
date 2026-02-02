@@ -1,6 +1,7 @@
 import { spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import { getFfmpegPath, getFfprobePath } from './ffmpeg-paths';
 
 export interface AudioChunk {
   path: string;
@@ -19,7 +20,7 @@ const LONG_AUDIO_THRESHOLD_SECONDS = 660;
 
 export async function getAudioDuration(audioPath: string): Promise<number> {
   return new Promise<number>((resolve, reject) => {
-    const child = spawn('ffprobe', [
+    const child = spawn(getFfprobePath(), [
       '-v', 'error',
       '-show_entries', 'format=duration',
       '-of', 'csv=p=0',
@@ -115,7 +116,7 @@ async function extractChunk(
   durationSeconds: number,
 ): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    const child = spawn('ffmpeg', [
+    const child = spawn(getFfmpegPath(), [
       '-y',
       '-i', inputPath,
       '-ss', startSeconds.toString(),
